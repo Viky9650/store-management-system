@@ -8,7 +8,7 @@ export default function ProductsPage() {
   useEffect(() => { fetchProducts(); }, []);
 
   const fetchProducts = () => {
-    axios.get('http://localhost:3001/products')
+    axios.get('https://store-r-2025.azurewebsites.net/products')
       .then(res => setProducts(res.data))
       .catch(err => console.error(err));
   };
@@ -17,7 +17,7 @@ export default function ProductsPage() {
 
   const handleSubmit = e => {
     e.preventDefault();
-    axios.post('http://localhost:3001/products', form, { headers: { 'X-User-Role': 'admin' } })
+    axios.post('https://store-r-2025.azurewebsites.net/products', form, { headers: { 'X-User-Role': 'admin' } })
       .then(() => { fetchProducts(); setForm({ name: '', price: '', stock_qty: '', warranty_period_months: '' }); })
       .catch(err => console.error(err));
   };

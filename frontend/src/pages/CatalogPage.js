@@ -5,7 +5,7 @@ export default function CatalogPage() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:3001/catalog')
+    axios.get('https://store-r-2025.azurewebsites.net/catalog')
       .then(res => setProducts(res.data))
       .catch(err => console.error(err));
   }, []);

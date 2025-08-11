@@ -8,7 +8,7 @@ export default function ServiceRequestsPage() {
   useEffect(() => { fetchRequests(); }, []);
 
   const fetchRequests = () => {
-    axios.get('http://localhost:3001/service-requests', { headers: { 'X-User-Role': 'manager' } })
+    axios.get('https://store-r-2025.azurewebsites.net/service-requests', { headers: { 'X-User-Role': 'manager' } })
       .then(res => setRequests(res.data))
       .catch(err => console.error(err));
   };
@@ -17,19 +17,19 @@ export default function ServiceRequestsPage() {
 
   const handleSubmit = e => {
     e.preventDefault();
-    axios.post('http://localhost:3001/service-requests', form, { headers: { 'X-User-Role': 'employee' } })
+    axios.post('https://store-r-2025.azurewebsites.net/service-requests', form, { headers: { 'X-User-Role': 'employee' } })
       .then(() => { fetchRequests(); setForm({ customer_id: '', product_id: '', issue_description: '', assigned_to: '' }); })
       .catch(err => console.error(err));
   };
 
   const approveUpdate = (id, approve) => {
-    axios.put(`http://localhost:3001/service-requests/${id}/approve-update`, { approve }, { headers: { 'X-User-Role': 'manager' } })
+    axios.put(`https://store-r-2025.azurewebsites.net/service-requests/${id}/approve-update`, { approve }, { headers: { 'X-User-Role': 'manager' } })
       .then(() => fetchRequests())
       .catch(err => console.error(err));
   };
 
   const downloadPDF = (id) => {
-    window.open(`http://localhost:3001/service-request-pdf/${id}`, '_blank');
+    window.open(`https://store-r-2025.azurewebsites.net/service-request-pdf/${id}`, '_blank');
   };
 
   return (

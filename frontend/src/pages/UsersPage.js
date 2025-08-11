@@ -8,7 +8,7 @@ export default function UsersPage() {
   useEffect(() => { fetchUsers(); }, []);
 
   const fetchUsers = () => {
-    axios.get('http://localhost:3001/users', { headers: { 'X-User-Role': 'admin' } })
+    axios.get('https://store-r-2025.azurewebsites.net/users', { headers: { 'X-User-Role': 'admin' } })
       .then(res => setUsers(res.data))
       .catch(err => console.error(err));
   };
@@ -17,7 +17,7 @@ export default function UsersPage() {
 
   const handleSubmit = e => {
     e.preventDefault();
-    axios.post('http://localhost:3001/users', form, { headers: { 'X-User-Role': 'admin' } })
+    axios.post('https://store-r-2025.azurewebsites.net/users', form, { headers: { 'X-User-Role': 'admin' } })
       .then(() => { fetchUsers(); setForm({ name: '', email: '', phone: '', address: '', role: 'customer' }); })
       .catch(err => console.error(err));
   };

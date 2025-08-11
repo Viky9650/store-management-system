@@ -8,7 +8,7 @@ export default function SalesPage() {
   useEffect(() => { fetchSales(); }, []);
 
   const fetchSales = () => {
-    axios.get('http://localhost:3001/sales', { headers: { 'X-User-Role': 'manager' } })
+    axios.get('https://store-r-2025.azurewebsites.net/sales', { headers: { 'X-User-Role': 'manager' } })
       .then(res => setSales(res.data))
       .catch(err => console.error(err));
   };
@@ -17,13 +17,13 @@ export default function SalesPage() {
 
   const handleSubmit = e => {
     e.preventDefault();
-    axios.post('http://localhost:3001/sales', form, { headers: { 'X-User-Role': 'manager' } })
+    axios.post('https://store-r-2025.azurewebsites.net/sales', form, { headers: { 'X-User-Role': 'manager' } })
       .then(() => { fetchSales(); setForm({ customer_id: '', total_amount: '' }); })
       .catch(err => console.error(err));
   };
 
   const downloadInvoice = (id) => {
-    window.open(`http://localhost:3001/invoice/${id}`, '_blank');
+    window.open(`https://store-r-2025.azurewebsites.net/invoice/${id}`, '_blank');
   };
 
   return (

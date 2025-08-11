@@ -5,7 +5,7 @@ export default function ReportsPage() {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
 
   const downloadCSV = () => {
-    window.open(`http://localhost:3001/monthly-report-csv/${year}/${month}`, '_blank');
+    window.open(`https://store-r-2025.azurewebsites.net/monthly-report-csv/${year}/${month}`, '_blank');
   };
 
   return (

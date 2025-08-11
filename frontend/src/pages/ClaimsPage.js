@@ -8,7 +8,7 @@ export default function ClaimsPage() {
   useEffect(() => { fetchClaims(); }, []);
 
   const fetchClaims = () => {
-    axios.get('http://localhost:3001/claims', { headers: { 'X-User-Role': 'employee' } })
+    axios.get('https://store-r-2025.azurewebsites.net/claims', { headers: { 'X-User-Role': 'employee' } })
       .then(res => setClaims(res.data))
       .catch(err => console.error(err));
   };
@@ -17,7 +17,7 @@ export default function ClaimsPage() {
 
   const handleSubmit = e => {
     e.preventDefault();
-    axios.post('http://localhost:3001/claims', form, { headers: { 'X-User-Role': 'employee' } })
+    axios.post('https://store-r-2025.azurewebsites.net/claims', form, { headers: { 'X-User-Role': 'employee' } })
       .then(() => { fetchClaims(); setForm({ sale_item_id: '', issue_description: '', status: 'Pending', resolution_notes: '' }); })
       .catch(err => console.error(err));
   };
