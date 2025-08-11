@@ -12,19 +12,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Database connection
+// ===== Database Connection =====
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-// ===== Middleware for Role Checking =====
+// ===== Middleware: Role Checking =====
 function checkRole(allowedRoles) {
   return (req, res, next) => {
-    // In production, req.user would come from authentication middleware
-    // For now, we simulate it with a header (X-User-Role)
-    const userRole = req.headers['x-user-role'] || 'customer';
-    req.user = { role: userRole }; // simulate auth
+    const userRole = req.headers['x-user-role'] || 'customer'; // Simulated role
+    req.user = { role: userRole };
     if (!allowedRoles.includes(userRole)) {
       return res.status(403).json({ error: 'Access denied' });
     }
@@ -34,7 +32,9 @@ function checkRole(allowedRoles) {
 
 // ===== USERS =====
 app.get('/users', checkRole(['admin', 'manager']), async (req, res) => {
-  const result = await pool.query('SELECT id, name, email, phone, address, role, created_at FROM users ORDER BY id DESC');
+  const result = await pool.query(
+    'SELECT id, name, email, phone, address, role, created_at FROM users ORDER BY id DESC'
+  );
   res.json(result.rows);
 });
 
@@ -115,8 +115,6 @@ app.get('/catalog', async (req, res) => {
 });
 
 // ===== SERVICE REQUESTS =====
-
-// Create Service Request
 app.post('/service-requests', checkRole(['admin', 'manager', 'employee']), async (req, res) => {
   const { customer_id, product_id, issue_description, assigned_to } = req.body;
   await pool.query(
@@ -126,7 +124,6 @@ app.post('/service-requests', checkRole(['admin', 'manager', 'employee']), async
   res.json({ message: 'Service request created' });
 });
 
-// Employee requests update
 app.put('/service-requests/:id/request-update', checkRole(['employee']), async (req, res) => {
   const { id } = req.params;
   const updates = req.body;
@@ -137,7 +134,6 @@ app.put('/service-requests/:id/request-update', checkRole(['employee']), async (
   res.json({ message: 'Update request sent for manager approval' });
 });
 
-// Manager/Admin approves or rejects update
 app.put('/service-requests/:id/approve-update', checkRole(['manager', 'admin']), async (req, res) => {
   const { id } = req.params;
   const { approve } = req.body;
@@ -207,6 +203,10 @@ app.get('/invoice/:saleId', checkRole(['admin', 'manager']), async (req, res) =>
   const sale = await pool.query('SELECT * FROM sales WHERE id=$1', [saleId]);
   const items = await pool.query('SELECT * FROM sale_items WHERE sale_id=$1', [saleId]);
 
+  if (sale.rows.length === 0) {
+    return res.status(404).json({ error: 'Sale not found' });
+  }
+
   const doc = new PDFDocument();
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename=invoice-${saleId}.pdf`);
@@ -214,4 +214,47 @@ app.get('/invoice/:saleId', checkRole(['admin', 'manager']), async (req, res) =>
 
   doc.fontSize(20).text('Invoice', { align: 'center' }).moveDown();
   doc.text(`Sale ID: ${saleId}`);
-  doc.text(
+  doc.text(`Date: ${sale.rows[0].sale_date}`);
+  doc.text(`Total Amount: $${sale.rows[0].total_amount}`);
+  doc.moveDown();
+  doc.text('Items:');
+
+  items.rows.forEach(item => {
+    doc.text(`Product ${item.product_id} - Qty: ${item.quantity} - $${item.price}`);
+  });
+
+  doc.end();
+});
+
+// ===== SERVICE REQUEST PDF =====
+app.get('/service-request-pdf/:id', checkRole(['admin', 'manager', 'employee']), async (req, res) => {
+  const { id } = req.params;
+  const request = await pool.query('SELECT * FROM service_requests WHERE id=$1', [id]);
+
+  if (request.rows.length === 0) {
+    return res.status(404).json({ error: 'Service request not found' });
+  }
+
+  const doc = new PDFDocument();
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename=service-request-${id}.pdf`);
+  doc.pipe(res);
+
+  doc.fontSize(20).text('Service Request', { align: 'center' }).moveDown();
+  doc.text(`Request ID: ${id}`);
+  doc.text(`Customer ID: ${request.rows[0].customer_id}`);
+  doc.text(`Product ID: ${request.rows[0].product_id}`);
+  doc.text(`Status: ${request.rows[0].status}`);
+  doc.text(`Issue: ${request.rows[0].issue_description}`);
+  doc.text(`Assigned To: ${request.rows[0].assigned_to}`);
+  doc.text(`Resolution: ${request.rows[0].resolution_notes || 'Pending'}`);
+  doc.text(`Approval Status: ${request.rows[0].approval_status}`);
+
+  doc.end();
+});
+
+// ===== START SERVER =====
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
